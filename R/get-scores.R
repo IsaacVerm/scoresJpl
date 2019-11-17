@@ -21,7 +21,9 @@ get_html_wiki_jpl <- function(url) {
   xml2::read_html(url)
 }
 
-parse_results <- function(html) {
+parse_scores <- function(html) {
   html %>%
-    html_nodes(xpath = "")
+    rvest::html_nodes(xpath = '//*[@id="Results"]/parent::h2/following-sibling::div/div/table//td') %>%
+    rvest::html_text() %>%
+    stringr::str_extract("\\d+–\\d+")
 }
