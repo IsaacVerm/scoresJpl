@@ -93,7 +93,8 @@ parse_scores <- function(html, season) {
   html %>%
     rvest::html_nodes(xpath = get_xpath_score_parsing(season)) %>%
     rvest::html_text() %>%
-    stringr::str_extract("\\d+–\\d+")
+    stringr::str_extract("\\d+–\\d+") %>%
+    .[!is.na(.)]
 }
 
 #' @export
