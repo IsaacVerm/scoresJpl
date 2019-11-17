@@ -99,11 +99,15 @@ parse_scores <- function(html, season) {
 
 #' @export
 get_scores <- function(seasons) {
-  seasons %>%
+  scores <- seasons %>%
     purrr::map(function(season) {
       season %>%
         create_wiki_jpl_url() %>%
         get_html_wiki_jpl() %>%
         parse_scores(season)
     })
+
+  names(scores) <- seasons
+
+  return(scores)
 }
