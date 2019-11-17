@@ -1,13 +1,13 @@
 Package: scoresJpl
-Title: What the Package Does (One Line, Title Case)
+Title: Explore scores in Jupiler Pro League
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Isaac",
+           family = "Verminck",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
+           email = "isaacverm@gmail.com",
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: What license it uses
+Description: Explore scores in Jupiler Pro League.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
