@@ -41,6 +41,7 @@ parse_scores <- function(html) {
     stringr::str_extract("\\d+–\\d+")
 }
 
+#' @export
 get_scores <- function(seasons) {
   seasons %>%
     purrr::map(function(season) {

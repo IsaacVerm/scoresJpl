@@ -14,7 +14,8 @@ LazyData: true
 Imports: 
     rvest,
     stringr,
-    purrr
+    purrr,
+    magrittr
 Suggests: 
     knitr,
     rmarkdown
