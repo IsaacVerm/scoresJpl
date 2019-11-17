@@ -2,3 +2,4 @@
 importFrom(magrittr,"%>%")
 export(get_scores)
 export(get_seasons)
+export(scores_to_df)
