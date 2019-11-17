@@ -1,0 +1,40 @@
+---
+title: "scores-jpl"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{scores-jpl}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(scoresJpl)
+```
+
+# Doel
+
+Doel van deze analyse is de data rond scores in de Jupiler Pro League te verkennen. Interessante vragen kunnen zijn:
+
+- welke scores komen het meest voor?
+- welke scores zijn het uitzonderlijkst?
+- wat zijn de meest opmerkerkelijk verschillen in aantal goals?
+- ...
+
+# Stappen
+
+De volgende stappen zijn nodig voor de analyse:
+
+- data verzamelen
+- data in juiste formaat plaatsen
+- data visualiseren
+
+# Data verzamelen
+
+Op Wikipedia staan de scores verzameld voor elk seizoen (voorbeeld seizoen [2013-2014](https://en.wikipedia.org/wiki/2013%E2%80%9314_Belgian_Pro_League)). De oorspronkelijke bron is [Soccerway](https://int.soccerway.com/national/belgium/pro-league/20132014/play-offs-i/r21454/) maar het is makkelijker om de data van Wikipedia op te halen. Daar staan de resultaten immers al in een tabel gebundeld.
