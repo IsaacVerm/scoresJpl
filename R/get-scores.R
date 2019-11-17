@@ -18,7 +18,10 @@ create_wiki_jpl_url <- function(season) {
   start_year <- substr(season, 1, 4)
   end_year <- substr(season, 6, 8)
 
-  if (start_year > 2009) {
+  if (start_year > 2015) {
+    league = "_Belgian_First_Division_A"
+  }
+  else if (start_year > 2009) {
     league = "_Belgian_Pro_League"
   } else if (start_year > 2005) {
     league = "_Belgian_First_Division"
@@ -52,7 +55,7 @@ get_html_wiki_jpl <- function(url) {
 #' 4) Get each cell of the table.
 parse_scores <- function(html) {
   html %>%
-    rvest::html_nodes(xpath = '//*[@id="Results"]/../following-sibling::div[1]/div/table//td') %>%
+    rvest::html_nodes(xpath = '//*[@id="Results"]/../following-sibling::div[1]//td') %>%
     rvest::html_text() %>%
     stringr::str_extract("\\d+–\\d+")
 }
