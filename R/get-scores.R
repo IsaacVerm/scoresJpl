@@ -23,7 +23,17 @@ get_html_wiki_jpl <- function(url) {
 
 parse_scores <- function(html) {
   html %>%
-    rvest::html_nodes(xpath = '//*[@id="Results"]/parent::h2/following-sibling::div/div/table//td') %>%
+    rvest::html_nodes(xpath = '//*[@id="Results"]/../following-sibling::div[1]/div/table//td') %>%
     rvest::html_text() %>%
     stringr::str_extract("\\d+–\\d+")
+}
+
+get_scores <- function(seasons) {
+  seasons %>%
+    purrr::map(function(season) {
+      season %>%
+        create_wiki_jpl_url() %>%
+        get_html_wiki_jpl() %>%
+        parse_scores()
+    })
 }
