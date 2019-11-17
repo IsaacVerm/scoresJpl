@@ -4,7 +4,7 @@
 \alias{parse_scores}
 \title{Parses the scores of the html wiki season page.}
 \usage{
-parse_scores(html)
+parse_scores(html, season)
 }
 \description{
 \code{parse_scores}

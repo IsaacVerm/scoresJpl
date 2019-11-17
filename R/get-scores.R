@@ -1,3 +1,4 @@
+#' @export
 get_seasons <- function() {
   c(
     "2006–07",
