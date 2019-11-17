@@ -11,3 +11,5 @@ Description: Explore scores in Jupiler Pro League.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+Imports: 
+    httr
