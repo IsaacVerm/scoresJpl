@@ -5,8 +5,7 @@ create_wiki_jpl_url <- function(season) {
 }
 
 get_html_wiki_jpl <- function(url) {
-  response <- httr::GET(url)
-  httr::content(response)
+  xml2::read_html(url)
 }
 
 parse_results <- function(html) {
