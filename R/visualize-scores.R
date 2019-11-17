@@ -9,3 +9,20 @@ plot_proportion_scores <- function(scores_by_frequency) {
                   x = "score",
                   y = "procentueel voorkomen")
 }
+
+#' @export
+plot_average_goals_by_season <- function(long_average_goals_by_season) {
+  ggplot2::ggplot(data = long_average_goals_by_season,
+                  ggplot2::aes(x = season,
+                               y = goals,
+                               group = goals_home_or_away,
+                               fill = goals_home_or_away)) +
+    ggplot2::geom_col(position = "dodge") +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+    ggplot2::labs(title = "gemiddeld aantal doelpunten per wedstrijd naar seizoen",
+         x = "seizoen",
+         y = "gemiddeld aantal doelpunten per wedstrijd",
+         fill = "thuis-en uitdoelpunten") +
+    ggplot2::scale_fill_manual(values = c("#999999", "#F8766D"),
+                               labels = c("uit","thuis"))
+}
