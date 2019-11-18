@@ -39,3 +39,15 @@ plot_most_frequent_scores_by_season <- function(most_frequent_scores_by_season) 
                   y = "percentage wedstrijden met deze score") +
     ggplot2::facet_wrap(~season)
 }
+
+#' @export
+plot_outlier_index <- function(outlier_index) {
+  ggplot2::ggplot(data = outlier_index,
+                  ggplot2::aes(x = reorder(season, -average_proportion_difference),
+                               y = round(average_proportion_difference * 1000, 2))) +
+    ggplot2::geom_col() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+    ggplot2::labs(title = "Index afwijkende seizoenen",
+                  x = "seizoen",
+                  y = "index")
+}
