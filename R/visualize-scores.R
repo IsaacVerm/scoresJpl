@@ -7,7 +7,7 @@ plot_proportion_scores <- function(scores_by_frequency) {
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
     ggplot2::labs(title = "Scores naargelang procentueel voorkomen",
                   x = "score",
-                  y = "procentueel voorkomen")
+                  y = "percentage wedstrijden met deze score")
 }
 
 #' @export
@@ -31,6 +31,11 @@ plot_average_goals_by_season <- function(long_average_goals_by_season) {
 plot_most_frequent_scores_by_season <- function(most_frequent_scores_by_season) {
   ggplot2::ggplot(data = most_frequent_scores_by_season,
                   ggplot2::aes(x = score,
-                               y = proportion)) +
+                               y = round(proportion * 100, 2))) +
+    ggplot2::geom_col() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+    ggplot2::labs(title = "Meest voorkomende scores per seizoen",
+                  x = "score",
+                  y = "percentage wedstrijden met deze score") +
     ggplot2::facet_wrap(~season)
 }
