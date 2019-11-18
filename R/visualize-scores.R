@@ -26,3 +26,11 @@ plot_average_goals_by_season <- function(long_average_goals_by_season) {
     ggplot2::scale_fill_manual(values = c("#999999", "#F8766D"),
                                labels = c("uit","thuis"))
 }
+
+#' @export
+plot_most_frequent_scores_by_season <- function(most_frequent_scores_by_season) {
+  ggplot2::ggplot(data = most_frequent_scores_by_season,
+                  ggplot2::aes(x = score,
+                               y = proportion)) +
+    ggplot2::facet_wrap(~season)
+}
