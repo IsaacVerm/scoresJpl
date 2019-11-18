@@ -9,13 +9,18 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
+  fig.width=10,
+  fig.height=8,
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  warning = FALSE,
+  cache = TRUE
 )
 ```
 
 ```{r setup}
 library(scoresJpl)
+library(magrittr)
 ```
 
 # Doel
@@ -23,8 +28,7 @@ library(scoresJpl)
 Doel van deze analyse is de data rond scores in de Jupiler Pro League te verkennen. Interessante vragen kunnen zijn:
 
 - welke scores komen het meest voor?
-- welke scores zijn het uitzonderlijkst?
-- wat zijn de meest opmerkerkelijk verschillen in aantal goals?
+- wat zijn de meest opmerkelijke verschillen in aantal goals?
 - ...
 
 # Stappen
@@ -37,4 +41,115 @@ De volgende stappen zijn nodig voor de analyse:
 
 # Data verzamelen
 
+## Wikipedia
+
 Op Wikipedia staan de scores verzameld voor elk seizoen (voorbeeld seizoen [2013-2014](https://en.wikipedia.org/wiki/2013%E2%80%9314_Belgian_Pro_League)). De oorspronkelijke bron is [Soccerway](https://int.soccerway.com/national/belgium/pro-league/20132014/play-offs-i/r21454/) maar het is makkelijker om de data van Wikipedia op te halen. Daar staan de resultaten immers al in een tabel gebundeld.
+
+## Tabellen zonder id
+
+Problematisch is wel dat de tabellen geen specifieke id hebben. Parsen met een CSS selector zoals `.wikitable` geeft ons alle tabellen. Om de juiste tabel te selecteren kunnen we:
+
+- rekening houden met de volgorde (bv. hopen dat de resultaten altijd op de 8e plaats staan)
+- xpath gebruiken en eerst zoeken op de id `Results` om zo de tabel op te halen
+
+De [xpath-wijze](https://devhints.io/xpath) is robuster aangezien we specifiek zoeken voor resultaten. De layout van de Wikipedia pagina kan wel licht verschillen van seizoen tot seizoen waardoor we verschillende xpaths moeten gebruiken.
+
+## Seizoenen met data
+
+Data is beschikbaar voor:
+
+- 2006/07 - 2008/09 als Belgische Eerste Klasse
+- 2009/10 - 2015/16 als Jupiler Pro League
+- 2016/17 - 2019/20 (huidig seizoen) als Belgische Eerste Divisie A
+
+Op Wikipedia is voor seizoenen tot 2005/06 geen data beschikbaar over de resultaten zelf (enkel het eindklassement).
+
+In deze analyse wordt geen rekening gehouden met het play-off systeem. Dit systeem is verschillende malen veranderd tussen 2006/07 en 2019/20 (de seizoenen waarvoor er data beschikbaar is). De reguliere competitie daarentegen heeft in de periode van onze dataset telkens hetzelfde format gehad.
+
+```{r}
+seasons <- get_seasons()
+
+scores <- get_scores(seasons)
+```
+
+# Data in juiste formaat
+
+We kunnen een kleine check uitvoeren om na te gaan off de data die we verkregen hebben plausibel is. In het seizoen [2009/10](https://en.wikipedia.org/wiki/2009%E2%80%9310_Belgian_Pro_League) veranderde het aantal teams in competitie van 18 naar 16. We verwachten dus dat er in de seizoenen ervoor _18 * 18 - 18_ ploegen waren (komt neer op 306). We doen -18 aangezien een ploeg niet tegen zichzelf kan spelen. Vanaf 2009/10 wordt dit dan _16 * 16 - 16_ oftewel 240 ploegen.
+
+```{r}
+scores %>%
+  purrr::map_dbl(length)
+  
+```
+
+Bij narekening blijkt onze berekening te kloppen op een detail na. In het seizoen 2009/10 zijn er slechts 230 wedstrijden. Bij [nader inzien](https://en.wikipedia.org/wiki/2009%E2%80%9310_Belgian_Pro_League) blijkt dit te verklaren doordat Moeskroen uit de competitie werd uitgesloten en bepaalde van hun wedstrijden werden verwijderd uit het officiële klassement. In het huidige seizoen zijn natuurlijk nog niet alle wedstrijden gespeeld.
+
+Op dit moment is de data in een `list` per seizoen, een dataframe is een gemakkelijkere structuur om mee te werken.
+
+```{r}
+df_scores <- scores_to_df(scores)
+```
+
+Op dit moment is `score` een enkele variabele. We kunnen de score opsplitsen in aantal doelpunten thuis en uit. Op basis van deze 2 variabelen kunnen we dan het verschil in aantal doelpunten berekenen. Een positieve waarde hier betekent meer thuis- dan uitdoelpunten.
+
+```{r}
+df_scores <- df_scores %>% 
+  add_goals_home() %>% 
+  add_goals_away() %>% 
+  add_goal_difference()
+```
+
+# Visualisatie
+
+## Welke scores komen het meeste voor?
+
+```{r}
+scores_by_frequency <- aggregate_scores_by_frequency(df_scores)
+
+plot_proportion_scores(scores_by_frequency)
+```
+
+## Is het aantal doelpunten gescoord stabiel over de seizoenen heen?
+
+Om thuis-en uitdoelpunten naast elkaar te visualiseren moeten we het gemiddeld aantal goals omvormen naar `long` formaat.
+
+```{r}
+long_average_goals_by_season <- df_scores %>% 
+  aggregate_average_goals_by_season() %>% 
+  average_goals_by_season_to_long()
+
+plot_average_goals_by_season(long_average_goals_by_season)
+```
+
+Het gemiddeld aantal gescoorde doelpunten per seizoen schommelt licht. Voor thuisdoelpunten schommelt dit rond 1,6 doelpunten per wedstrijd, voor uitdoelpunten rond 1,2 doelpunten per wedstrijd. Er is dus altijd een duidelijk verschil tussen thuis en uit te bemerken.
+
+## Welk seizoen had het meest uitzonderlijke scores?
+
+We kunnen dit zowel visueel bekijken als met een formule. Visueel geven we dit weer als het procentueel voorkomen van de 5 meest voorkomende scores over alle seizoenen heen. Scores zijn geordend van minst aantrekkelijk (uiterst links) tot meest opwindend (uiterst rechts). Scores met minder doelpunten worden beschouwd als minder aantrekkelijk. Hoe meer de grafiek naar rechts "wijst" hoe aantrekkelijker de wedstrijden in het seizoen.
+
+```{r}
+frequency_scores_by_season <- df_scores %>% 
+  aggregate_frequency_scores_by_season()
+
+most_frequent_scores <- get_most_frequent_scores(scores_by_frequency, 5)
+
+most_frequent_scores_by_season <- select_most_frequent_scores_by_season(frequency_scores_by_season,
+                                                                        most_frequent_scores)
+
+most_frequent_scores_by_season %>% plot_most_frequent_scores_by_season()
+```
+
+Het is duidelijk dat er grote verschillen zijn tussen de seizoenen. Zo waren er bijzonder veel 0-0 gelijke spelen in de seizoenen 2007/08 en 2011/12 (telkens bijna 10% van alle wedstrijden). Het huidige seizoen lijkt een van de meest aantrekkelijke seizoenen te zijn met 2-1 als de meest voorkomende score.
+
+Met een formule berekenen we voor elke score het verschil in gemiddeld procentueel voorkomen over alle seizoenen heen en procentueel voorkomen in een specifiek seizoen. Dan nemen we het gemiddelde van de absolute waarde van alle verschillen in het seizoen gewogen naar aantal wedstrijden met die score in een seizoen. Dit cijfer geeft weer hoe uitzonderlijk een seizoen is. Aangezien de verschillen klein zijn (verschillen van percentages) is de index vermenigvuldigd met 1000 om het leesbaarder te maken.
+
+```{r}
+get_outlier_index(most_frequent_scores_by_season, scores_by_frequency) %>%
+  plot_outlier_index()
+  
+```
+
+Als we de index vergelijken met de grafiek hierboven lijkt dit te kloppen. 2016/17 lijkt inderdaad het meest afwijkenede seizoen te zijn met 2-1 als zowel meest frequente als meest aantrekkelijke score.
+
+
+
