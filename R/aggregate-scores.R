@@ -26,7 +26,7 @@ average_goals_by_season_to_long <- function(average_goals_by_season) {
 }
 
 #' @export
-aggregate_frequency_score_by_season <- function(df_scores) {
+aggregate_frequency_scores_by_season <- function(df_scores) {
   df_scores %>%
     dplyr::group_by(season, score) %>%
     dplyr::summarise(n = n()) %>%
