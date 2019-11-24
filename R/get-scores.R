@@ -45,6 +45,7 @@ get_xpath_score_parsing <- function(season) {
   pattern_2 <- '//*[@id="Results"]/../following-sibling::div[1]//td'
   pattern_3 <-
     '//*[@id="Results"]/../following-sibling::table[1]//td'
+  pattern_4 <- '//*[@id="Results"]/../following-sibling::table[1]//td/span'
 
   pattern_by_season = list(
     "2006–07" = pattern_1,
@@ -56,7 +57,7 @@ get_xpath_score_parsing <- function(season) {
     "2012–13" = pattern_2,
     "2013–14" = pattern_2,
     "2014–15" = pattern_2,
-    "2015–16" = pattern_3,
+    "2015–16" = pattern_4,
     "2016–17" = pattern_2,
     "2017–18" = pattern_2,
     "2018–19" = pattern_2,
