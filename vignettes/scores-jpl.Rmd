@@ -1,5 +1,5 @@
 ---
-title: "scores-jpl"
+title: "Wedstrijduitslagen in de Belgische competitie"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{scores-jpl}

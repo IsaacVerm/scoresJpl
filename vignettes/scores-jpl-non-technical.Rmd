@@ -1,0 +1,157 @@
+---
+title: "Wedstrijduitslagen in de Belgische competitie"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{scores-jpl}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  fig.width=10,
+  fig.height=8,
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  cache = TRUE,
+  echo = FALSE
+)
+```
+
+```{r setup}
+library(scoresJpl)
+library(magrittr)
+library(knitr)
+library(tibble)
+```
+
+Doel van deze analyse is de data rond wedstrijduitslagen in de Jupiler Pro League te verkennen. Interessante vragen kunnen onder meer gaan over welke scores veel voorkomen en hoe de scores evolueren over de seizoenen heen.
+
+# Stappen analyse
+
+De analyse bestaat uit de volgende stappen:
+
+- data verzamelen
+- data in juiste formaat plaatsen
+- correctheid data nagaan
+- data visualiseren
+
+Het gedeelte rond het herformatteren van de data wordt niet expliciet besproken aangezien dit meer een technische aangelegenheid is.
+
+# Data verzamelen
+
+## Wikipedia
+
+Op Wikipedia zijn de wedstrijduitslagen verzameld voor elk seizoen (voorbeeld seizoen [2013-2014](https://en.wikipedia.org/wiki/2013%E2%80%9314_Belgian_Pro_League)). De oorspronkelijke bron is [Soccerway](https://int.soccerway.com/national/belgium/pro-league/20132014/play-offs-i/r21454/) maar het is makkelijker om de data van Wikipedia op te halen. Daar staan de resultaten immers al in een matrix gebundeld wat het makkelijk voor ons maakt om de data in een voor ons bruikbaar formaat om te zetten.
+
+## Seizoenen met data
+
+Wedstrijduitslagen zijn beschikbaar voor:
+
+- 2006/07 - 2008/09 als Belgische Eerste Klasse
+- 2009/10 - 2015/16 als Jupiler Pro League
+- 2016/17 - 2019/20 (huidig seizoen) als Belgische Eerste Divisie A
+
+De naamsveranderingen van de competitie vallen samen met wijzigingen in de competitiestructuur. In [2009](https://nl.wikipedia.org/wiki/Competitiestructuur_van_het_Belgisch_voetbal#2009) werd het aantal clubs verlaagd naar 16 in plaats van 18 en werd het systeem van play-offs geïntroduceerd. In dit play-off systeem wordt na de reguliere competitie nog een aantal extra wedstrijden gespeeld. In [2016](https://nl.wikipedia.org/wiki/Competitiestructuur_van_het_Belgisch_voetbal#2016) 2016 werd een duidelijke splitsing doorgevoerd tussen het professionele voetbalcircuit en het amateurvoetbal. Deze hervorming had slechts een beperkte invloed op de eerste divisie. In dit systeem konden ploegen uit de eerste klasse B (de vroegere 2e klasse) zich ook plaatsen voor play-offs in eerste klasse A (de vroegere 1e klasse).
+
+Op Wikipedia zijn wedstrijduitslagen voor het seizoen 2005/06 niet beschikbaar. Enkel het eindklassement is beschikbaar voor deze seizoenen. Helaas is het dus niet mogelijk de wedstrijduitslagen van deze seizoenen te analyseren op basis van de gekozen databron.
+
+In deze analyse wordt enkel rekening gehouden met wedstrijden in de reguliere competitie en niet met play-off wedstrijden. Zoals hierboven beschreven is het play-off systeem verschillende malen veranderd tussen 2006/07 en 2019/20 (de seizoenen waarvoor er data beschikbaar is). De reguliere competitie daarentegen heeft in de periode van onze dataset telkens hetzelfde format gehad. Om de analyse consistent te houden is de meest eenvoudige keuze om de focus te houden op de reguliere competitie.
+
+```{r}
+seasons <- get_seasons()
+
+scores <- get_scores(seasons)
+```
+
+# Correctheid data nagaan
+
+Na het ophalen van de data is de volgende stap na te gaan of de verkregen resultaten wel plausibel zijn. Dit doen we door te bekijken of elk seizoen minstens het correcte aantal wedstrijden heeft. In het seizoen 2009/10 veranderde het aantal teams in competitie van 18 naar 16. We verwachten dus dat er in de seizoenen ervoor _18 * 18 - 18_ wedstrijden zijn gespeeld (komt neer op 306). We trekken 18 af aangezien een ploeg niet tegen zichzelf kan spelen. Vanaf 2009/10 wordt dit dan _16 * 16 - 16_ oftewel 240 wedstrijden.
+
+Aangezien in het huidige seizoen nog niet alle wedstrijden zijn afgewerkt verwachten we hier minder wedstrijden. De 15e speeldag is juist afgewerkt dus er zou een totaal van _240 / 2_ oftewel 120 wedstrijden moeten zijn afgewerkt.
+
+```{r results = 'asis'}
+scores %>%
+  purrr::map_dbl(length) %>% 
+  tibble::enframe() %>%
+  setNames(c("seizoen", "wedstrijden")) %>% 
+  kable(caption = "aantal wedstrijden per seizoen")
+  
+```
+
+Bij narekening blijkt onze berekening te kloppen op enkele details na. In het seizoen 2009/10 zijn er slechts 230 wedstrijden. Dit is [te verklaren](https://en.wikipedia.org/wiki/2009%E2%80%9310_Belgian_Pro_League) doordat Moeskroen uit de competitie werd uitgesloten en enkele van hun wedstrijden verwijderd werden uit het officiële klassement. In het huidige seizoen komen we uit op 119 ploegen in plaats van de verwachte 120. De wedstrijd tussen [Charleroi en Club Brugge](https://sporza.be/nl/matches/voetbal/jupiler-pro-league/2019-2020/regulier/05/charleroi-club-brugge/) op de 5e speeldag werd uitgesteld.
+
+```{r}
+df_scores <- scores_to_df(scores)
+```
+
+
+```{r}
+df_scores <- df_scores %>% 
+  add_goals_home() %>% 
+  add_goals_away() %>% 
+  add_goal_difference()
+```
+
+# Visualisatie
+
+## Welke scores komen het meeste voor?
+
+De vraag die oorspronkelijk aanleiding gaf tot deze analyse is welke scores nu het meest voorkomen in de Belgische competitie.
+
+```{r}
+scores_by_frequency <- aggregate_scores_by_frequency(df_scores)
+
+plot_proportion_scores(scores_by_frequency)
+```
+
+Intuïtief had ik verwacht dat de meest voorkomende score oftewel 1-0 oftewel 0-1 zou zijn. Dit blijkt niet het geval. 0-1 is zelfs slechts de 7 meest voorkomende score. 1-1 blijkt over alle seizoenen heen de meest voorkomende score geweest te zijn. 
+
+Scores waarbij er grote doelpuntenverschillen zijn komen niet veel voor. De eerste score waarbij het doelpuntenverschil meer dan 3 doelpunten bedraagt is 4-0. Slechts 1,75% van de wedstrijden eindigden in deze score. De meest extreme score in de laatste 14 seizoenen was 8-1 in het seizoen 2006/07. Dit was een match tussen Anderlecht en Beveren.
+
+## Is het aantal doelpunten gescoord stabiel over de seizoenen heen?
+
+We kunnen een score ook opdelen in thuis- en uitdoelpunten. Een interessante vraag die zich dan opdringt is of het aantal thuis-en uitdoelpunten stabiel blijft over de seizoenen heen.
+
+```{r}
+long_average_goals_by_season <- df_scores %>% 
+  aggregate_average_goals_by_season() %>% 
+  average_goals_by_season_to_long()
+
+plot_average_goals_by_season(long_average_goals_by_season)
+```
+
+Het gemiddeld aantal gescoorde doelpunten per seizoen schommelt slechts zeer licht. Voor thuisdoelpunten blijft dit stabiel rond 1,6 doelpunten per wedstrijd, voor uitdoelpunten rond 1,2 doelpunten per wedstrijd. Er is dus altijd een duidelijk verschil tussen thuis en uit te bemerken.
+
+## Meest aantrekkelijke seizoenen
+
+Voorafgaand keken we naar de meest voorkomende scores. We kunnen hier nog verder op ingaan en kijken naar de meest frequente scores per seizoen. We kunnen dit zowel visueel bekijken als meer formeel door een index te berekenen.
+
+Visueel geven we dit weer als het procentueel voorkomen van de 5 meest voorkomende scores over alle seizoenen heen. Scores zijn geordend van minst aantrekkelijk (uiterst links) tot meest opwindend (uiterst rechts). Scores met minder doelpunten worden beschouwd als minder aantrekkelijk. Hoe meer de grafiek naar rechts "wijst" hoe aantrekkelijker de wedstrijden in het seizoen.
+
+```{r}
+frequency_scores_by_season <- df_scores %>% 
+  aggregate_frequency_scores_by_season()
+
+most_frequent_scores <- get_most_frequent_scores(scores_by_frequency, 5)
+
+most_frequent_scores_by_season <- select_most_frequent_scores_by_season(frequency_scores_by_season,
+                                                                        most_frequent_scores)
+
+most_frequent_scores_by_season %>% plot_most_frequent_scores_by_season()
+```
+
+Het is duidelijk dat er grote verschillen zijn tussen de seizoenen. Zo waren er bijzonder veel 0-0 gelijke spelen in de seizoenen 2007/08 en 2011/12 (telkens bijna 10% van alle wedstrijden). Het huidige seizoen lijkt een van de meest aantrekkelijke seizoenen te zijn met 2-1 als de meest voorkomende score.
+
+Met een formule berekenen we voor elke score het verschil in gemiddeld procentueel voorkomen van een score over alle seizoenen heen en het procentueel voorkomen in een specifiek seizoen. Dan nemen we het gemiddelde van de absolute waarde van alle verschillen in het seizoen gewogen naar aantal wedstrijden met die score in een seizoen. Dit cijfer geeft weer hoe uitzonderlijk de wedstrijduitslagen in een seizoen zijn. Aangezien de verschillen klein zijn (we nemen de verschillen van percentages) is de index vermenigvuldigd met 1000 om het leesbaarder te maken.
+
+```{r}
+get_outlier_index(most_frequent_scores_by_season, scores_by_frequency) %>%
+  plot_outlier_index()
+```
+
+De index bevestigt de visuele indruk die de grafiek van de meest voorkomende scores per seizoen aangaf. 2016/17 lijkt inderdaad het meest afwijkende seizoen te zijn met 2-1 als zowel meest frequente als meest aantrekkelijke score.
+
+
+
