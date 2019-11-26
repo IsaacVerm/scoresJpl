@@ -11,18 +11,18 @@ aggregate_average_goals_by_season <- function(df_scores) {
   df_scores %>%
     dplyr::group_by(season) %>%
     dplyr::summarise(
-      average_goals_home = mean(goals_home),
-      average_goals_away = mean(goals_away)
+      home = mean(goals_home),
+      away = mean(goals_away)
     )
 }
 
 #' @export
 average_goals_by_season_to_long <- function(average_goals_by_season) {
   average_goals_by_season %>%
-    tidyr::gather(key = "goals_home_or_away",
+    tidyr::gather(key = "venue",
                   value = "goals",
-                  average_goals_home,
-                  average_goals_away)
+                  home,
+                  away)
 }
 
 #' @export

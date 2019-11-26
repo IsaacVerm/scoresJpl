@@ -15,8 +15,8 @@ plot_average_goals_by_season <- function(long_average_goals_by_season) {
   ggplot2::ggplot(data = long_average_goals_by_season,
                   ggplot2::aes(x = season,
                                y = goals,
-                               group = goals_home_or_away,
-                               fill = goals_home_or_away)) +
+                               group = venue,
+                               fill = venue)) +
     ggplot2::geom_col(position = "dodge") +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
     ggplot2::labs(title = "gemiddeld aantal doelpunten per wedstrijd naar seizoen",
