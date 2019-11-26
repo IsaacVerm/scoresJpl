@@ -17,7 +17,8 @@ Imports:
     purrr,
     magrittr,
     ggplot2,
-    tidyr
+    tidyr,
+    readr
 Suggests: 
     knitr,
     rmarkdown
