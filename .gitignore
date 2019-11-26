@@ -3,3 +3,5 @@
 .RData
 inst/doc
 vignettes/scores-jpl_cache/*
+vignettes/scores-jpl-non-technical_cache/*
+vignettes/rsconnect/*
