@@ -1,6 +1,6 @@
 ---
 title: "Wedstrijduitslagen in de Belgische competitie"
-output: rmarkdown::html_vignette
+output: rmarkdown::pdf_document
 vignette: >
   %\VignetteIndexEntry{scores-jpl}
   %\VignetteEngine{knitr::rmarkdown}
@@ -15,7 +15,8 @@ knitr::opts_chunk$set(
   comment = "#>",
   warning = FALSE,
   cache = TRUE,
-  echo = FALSE
+  echo = FALSE,
+  message = FALSE
 )
 ```
 
